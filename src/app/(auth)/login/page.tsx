@@ -27,13 +27,13 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "繝ｭ繧ｰ繧､繝ｳ縺ｫ螟ｱ謨励＠縺ｾ縺励◆");
+        setError(data.error || "ログインに失敗しました");
         return;
       }
 
       router.push("/keywords");
     } catch {
-      setError("騾壻ｿ｡繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆");
+      setError("通信エラーが発生しました");
     } finally {
       setLoading(false);
     }
@@ -44,9 +44,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-accent to-blue bg-clip-text text-transparent">
-            SEOﾃ宥EO
+            SEO×GEO
           </h1>
-          <p className="text-text-mid mt-2">繝ｭ繧ｰ繧､繝ｳ</p>
+          <p className="text-text-mid mt-2">ログイン</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-6">
           <form onSubmit={handleLogin} className="space-y-4">
@@ -56,7 +56,7 @@ export default function LoginPage() {
               </div>
             )}
             <div>
-              <label className="block text-sm text-text-mid mb-1">繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ</label>
+              <label className="block text-sm text-text-mid mb-1">メールアドレス</label>
               <input
                 type="email"
                 value={email}
@@ -67,24 +67,24 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="block text-sm text-text-mid mb-1">繝代せ繝ｯ繝ｼ繝・/label>
+              <label className="block text-sm text-text-mid mb-1">パスワード</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 bg-bg-soft border border-border rounded-lg text-text focus:outline-none focus:border-accent"
-                placeholder="窶｢窶｢窶｢窶｢窶｢窶｢窶｢窶｢"
+                placeholder="••••••••"
                 required
               />
             </div>
             <Button type="submit" className="w-full" loading={loading}>
-              繝ｭ繧ｰ繧､繝ｳ
+              ログイン
             </Button>
           </form>
 
-          {/* 繝・せ繝医い繧ｫ繧ｦ繝ｳ繝域ュ蝣ｱ */}
+          {/* テストアカウント情報 */}
           <div className="mt-4 p-3 bg-bg-soft border border-border rounded-lg">
-            <p className="text-xs text-text-dim mb-2">繝・せ繝育畑繧｢繧ｫ繧ｦ繝ｳ繝茨ｼ医お繝ｳ繧ｿ繝ｼ繝励Λ繧､繧ｺ・・</p>
+            <p className="text-xs text-text-dim mb-2">テスト用アカウント（エンタープライズ）:</p>
             <div className="text-xs text-text-mid space-y-1">
               <p>ID: <span className="text-accent font-mono">enterprise@test.seogeo.jp</span></p>
               <p>PW: <span className="text-accent font-mono">Enterprise2024!</span></p>
@@ -92,9 +92,9 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-4 text-center text-sm text-text-dim">
-            繧｢繧ｫ繧ｦ繝ｳ繝医′縺ｪ縺・ｴ蜷医・{" "}
+            アカウントがない場合は{" "}
             <Link href="/signup" className="text-accent hover:underline">
-              繧ｵ繧､繝ｳ繧｢繝・・
+              サインアップ
             </Link>
           </p>
         </div>

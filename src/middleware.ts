@@ -17,7 +17,7 @@ export async function middleware(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Supabase險ｭ螳壹′縺ゅｋ蝣ｴ蜷医・Supabase隱崎ｨｼ繧剃ｽｿ逕ｨ
+  // Supabase設定がある場合はSupabase認証を使用
   if (supabaseUrl && supabaseKey) {
     const supabase = createServerClient(supabaseUrl, supabaseKey, {
       cookies: {
@@ -47,7 +47,8 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  // 繝・Δ隱崎ｨｼ繝｢繝ｼ繝会ｼ・upabase譛ｪ險ｭ螳壽凾・・  const demoSession = req.cookies.get(SESSION_COOKIE_NAME)?.value;
+  // デモ認証モード（Supabase未設定時）
+  const demoSession = req.cookies.get(SESSION_COOKIE_NAME)?.value;
 
   if (!demoSession && !isAuthPage) {
     return NextResponse.redirect(new URL("/login", req.url));

@@ -7,7 +7,7 @@ import {
   type DemoUser,
 } from "@/lib/demo-auth";
 
-// POST /api/auth/demo - 繝ｭ繧ｰ繧､繝ｳ
+// POST /api/auth/demo - ログイン
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { action } = body;
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const { email, password } = body;
     const user = validateCredentials(email, password);
     if (!user) {
-      return NextResponse.json({ error: "繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ縺ｾ縺溘・繝代せ繝ｯ繝ｼ繝峨′豁｣縺励￥縺ゅｊ縺ｾ縺帙ｓ" }, { status: 401 });
+      return NextResponse.json({ error: "メールアドレスまたはパスワードが正しくありません" }, { status: 401 });
     }
     const token = createSessionToken(user);
     const res = NextResponse.json({ user });
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7譌･
+      maxAge: 60 * 60 * 24 * 7, // 7日
     });
     return res;
   }
@@ -33,12 +33,13 @@ export async function POST(req: NextRequest) {
   if (action === "signup") {
     const { email, companyName, lastName, firstName, phone, password } = body;
 
-    // 譌｢蟄倥い繧ｫ繧ｦ繝ｳ繝医メ繧ｧ繝・け
+    // 既存アカウントチェック
     if (DEMO_ACCOUNTS[email]) {
-      return NextResponse.json({ error: "縺薙・繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ縺ｯ譌｢縺ｫ逋ｻ骭ｲ縺輔ｌ縺ｦ縺・∪縺・ }, { status: 409 });
+      return NextResponse.json({ error: "このメールアドレスは既に登録されています" }, { status: 409 });
     }
 
-    // 繝・Δ逕ｨ・壽眠隕冗匳骭ｲ繧偵Γ繝｢繝ｪ縺ｫ霑ｽ蜉・亥・襍ｷ蜍輔〒豸医∴繧具ｼ・    const newUser: DemoUser = {
+    // デモ用：新規登録をメモリに追加（再起動で消える）
+    const newUser: DemoUser = {
       id: `demo-${Date.now()}`,
       email,
       companyName,
@@ -70,7 +71,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
 
-// GET /api/auth/demo - 繧ｻ繝・す繝ｧ繝ｳ遒ｺ隱・export async function GET(req: NextRequest) {
+// GET /api/auth/demo - セッション確認
+export async function GET(req: NextRequest) {
   const { parseSessionToken } = await import("@/lib/demo-auth");
   const token = req.cookies.get(SESSION_COOKIE_NAME)?.value;
   if (!token) {
