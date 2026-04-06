@@ -326,6 +326,13 @@ function BillingSettings() {
                 variant={plan.current ? "ghost" : "primary"}
                 size="sm"
                 disabled={plan.current}
+                onClick={() => {
+                  if (!plan.current) {
+                    // Pay.jp チェックアウトはフロント側トークン化が必要
+                    // 実装時は PayjpCheckout コンポーネントで token を取得後 API を呼ぶ
+                    alert("プランの変更は管理者にお問い合わせください");
+                  }
+                }}
               >
                 {plan.current ? "現在のプラン" : "アップグレード"}
               </Button>

@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { sendSlackNotification, formatRankChangeMessage, formatGeoChangeMessage } from "./slack";
 import { sendChatworkNotification, formatRankChangeChatwork } from "./chatwork";
+import {
+  sendEmailNotification,
+  formatRankChangeEmail,
+  formatGeoChangeEmail,
+  formatErrorEmail,
+} from "./email";
 
 type NotificationChannel = "EMAIL" | "SLACK" | "CHATWORK";
 
@@ -81,8 +87,7 @@ async function dispatchNotification(
       await sendChatworkForEvent(webhookUrl, event);
       break;
     case "EMAIL":
-      // TODO: Implement email via Resend or similar
-      console.log("Email notification not yet implemented");
+      await sendEmailForEvent(webhookUrl, event);
       break;
   }
 }
@@ -103,6 +108,26 @@ async function sendSlackForEvent(webhookUrl: string, event: NotificationEvent) {
       await sendSlackNotification(webhookUrl, {
         text: `:warning: [${event.domain}] エラー: ${event.message}`,
       });
+      break;
+    }
+  }
+}
+
+async function sendEmailForEvent(toEmail: string, event: NotificationEvent) {
+  switch (event.type) {
+    case "rank_change": {
+      const { subject, html } = formatRankChangeEmail(event.keyword, event.previousPosition, event.currentPosition, event.domain);
+      await sendEmailNotification(toEmail, subject, html);
+      break;
+    }
+    case "geo_change": {
+      const { subject, html } = formatGeoChangeEmail(event.keyword, event.engine, event.isMentioned, event.domain);
+      await sendEmailNotification(toEmail, subject, html);
+      break;
+    }
+    case "error": {
+      const { subject, html } = formatErrorEmail(event.message, event.domain);
+      await sendEmailNotification(toEmail, subject, html);
       break;
     }
   }

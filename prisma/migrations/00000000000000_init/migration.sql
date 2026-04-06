@@ -68,7 +68,7 @@ CREATE TABLE "organizations" (
     "max_projects" INTEGER NOT NULL DEFAULT 1,
     "max_keywords" INTEGER NOT NULL DEFAULT 100,
     "max_geo_checks" INTEGER NOT NULL DEFAULT 50,
-    "stripe_customer_id" TEXT,
+    "payjp_customer_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
