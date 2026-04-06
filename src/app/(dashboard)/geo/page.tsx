@@ -23,6 +23,23 @@ export default function GeoPage() {
     { enabled: !!projectId }
   );
 
+  const handleRecheck = async () => {
+    if (!projectId) return;
+    setIsChecking(true);
+    try {
+      await fetch("/api/geo/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId }),
+      });
+      geoQuery.refetch();
+    } catch (err) {
+      console.error("GEO recheck failed:", err);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
   const results = geoQuery.data ?? [];
   const avgScore = results.length > 0
     ? Math.round(results.reduce((sum, r) => sum + (r.geoScore || 0), 0) / results.length)
@@ -40,11 +57,9 @@ export default function GeoPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">GEOモニタリング</h1>
         <Button
-          onClick={() => {
-            setIsChecking(true);
-            setTimeout(() => setIsChecking(false), 2000);
-          }}
+          onClick={handleRecheck}
           loading={isChecking}
+          disabled={!projectId}
         >
           <RefreshCw size={16} className="mr-1.5" />
           再チェック

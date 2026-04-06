@@ -48,4 +48,24 @@ export const auditRouter = t.router({
         data: { isResolved: true },
       });
     }),
+
+  startCrawl: t.procedure
+    .input(z.object({ projectId: z.string() }))
+    .mutation(async ({ input }) => {
+      // クロールを開始し、暫定的な監査レコードを作成する
+      const audit = await prisma.siteAudit.create({
+        data: {
+          projectId: input.projectId,
+          pagesCrawled: 0,
+          healthScore: 0,
+          errorsCount: 0,
+          warningsCount: 0,
+          noticesCount: 0,
+        },
+      });
+
+      // 本番では BullMQ ジョブキューに投入してバックグラウンドでクロールを実行する
+      // await crawlQueue.add('site-audit', { auditId: audit.id, projectId: input.projectId });
+      return audit;
+    }),
 });

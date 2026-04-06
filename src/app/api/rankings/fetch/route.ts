@@ -51,20 +51,28 @@ export async function POST(request: Request) {
       // Find our domain in results
       let positionGoogle: number | null = null;
       let hasAiOverview = false;
-      const aiOverviewPosition: number | null = null;
+      let aiOverviewPosition: number | null = null;
 
       if (serp.items) {
         for (const item of serp.items) {
-          if (item.url && item.url.includes(project.domain)) {
+          // AI Overview の検出（DataForSEO は type: "ai_overview" で返す）
+          if (item.type === "ai_overview" || item.type === "featured_snippet") {
+            hasAiOverview = true;
+            // AI Overview 内に自ドメインが含まれているか確認
+            const references = item.references ?? item.items ?? [];
+            for (let idx = 0; idx < references.length; idx++) {
+              const ref = references[idx];
+              if (ref.url && ref.url.includes(project.domain)) {
+                aiOverviewPosition = idx + 1;
+                break;
+              }
+            }
+          }
+
+          if (item.url && item.url.includes(project.domain) && !positionGoogle) {
             positionGoogle = item.rank_absolute ?? item.position ?? null;
-            break;
           }
         }
-      }
-
-      // Check for AI Overview
-      if ("hasAiOverview" in serp) {
-        hasAiOverview = !!serp.hasAiOverview;
       }
 
       // Save ranking

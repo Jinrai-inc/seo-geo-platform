@@ -2,6 +2,7 @@ import { initTRPC } from "@trpc/server";
 import { z } from "zod";
 import { Context } from "../context";
 import { prisma } from "@/lib/prisma";
+import { generateReport } from "@/server/services/reportGenerator";
 
 const t = initTRPC.context<Context>().create();
 
@@ -25,7 +26,12 @@ export const reportsRouter = t.router({
       customCompanyName: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
-      return prisma.report.create({ data: input });
+      const report = await prisma.report.create({ data: input });
+      // バックグラウンドで PDF 生成を実行（レスポンスはブロックしない）
+      generateReport(report.id).catch((err) =>
+        console.error("Report generation failed:", err)
+      );
+      return report;
     }),
 
   getDownloadUrl: t.procedure

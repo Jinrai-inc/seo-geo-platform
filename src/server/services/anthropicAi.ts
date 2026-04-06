@@ -1,7 +1,7 @@
 export async function callClaude(prompt: string, systemPrompt?: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return JSON.stringify({ error: "ANTHROPIC_API_KEY not configured", dummy: true });
+    throw new Error("ANTHROPIC_API_KEY が設定されていません");
   }
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {

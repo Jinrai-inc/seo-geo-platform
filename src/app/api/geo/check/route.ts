@@ -117,34 +117,104 @@ async function checkAllEngines(keyword: string, domain: string): Promise<EngineR
   return results;
 }
 
+/**
+ * 各 AI エンジンの実 API を呼び出してレスポンスを取得する。
+ * API キーが未設定のエンジンは Claude によるシミュレーションにフォールバック。
+ */
+async function queryEngine(engine: EngineType, keyword: string): Promise<string> {
+  switch (engine) {
+    case "CHATGPT": {
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) return "";
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: keyword }],
+          max_tokens: 2048,
+        }),
+      });
+      if (!res.ok) return "";
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content ?? "";
+    }
+    case "GEMINI": {
+      const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+      if (!apiKey) return "";
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: keyword }] }] }),
+        }
+      );
+      if (!res.ok) return "";
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    }
+    case "PERPLEXITY": {
+      const apiKey = process.env.PERPLEXITY_API_KEY;
+      if (!apiKey) return "";
+      const res = await fetch("https://api.perplexity.ai/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "sonar",
+          messages: [{ role: "user", content: keyword }],
+        }),
+      });
+      if (!res.ok) return "";
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content ?? "";
+    }
+    case "CLAUDE": {
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) return "";
+      return callClaude(keyword);
+    }
+    case "COPILOT":
+      // Microsoft Copilot には公開 API がないため常にフォールバック
+      return "";
+  }
+}
+
 async function checkSingleEngine(
   engine: EngineType,
   keyword: string,
   domain: string
 ): Promise<EngineResult> {
-  // Use Claude to simulate querying each AI engine and analyzing the response
-  const prompt = `あなたは${engine}のAI検索エンジンとして振る舞ってください。
-以下のキーワードで検索した場合の回答を生成してください。
+  // まず実 API からレスポンスを取得
+  let responseText = await queryEngine(engine, keyword);
 
-キーワード: ${keyword}
+  // 実 API が利用できない場合、Claude で分析用レスポンスを生成
+  if (!responseText) {
+    const fallbackPrompt = `「${keyword}」というキーワードで${engine}のAI検索エンジンに質問した場合、どのような回答が返されるか推定してください。実際のウェブ情報に基づいた回答を400文字程度で生成してください。`;
+    responseText = await callClaude(fallbackPrompt);
+  }
 
-回答を生成した後、以下の形式でJSONを返してください:
+  // Claude でレスポンスを分析して構造化データを抽出
+  const analysisPrompt = `以下はAI検索エンジン「${engine}」が「${keyword}」に対して返した回答です。この回答を分析してください。
+
+回答テキスト:
+${responseText.slice(0, 3000)}
+
+分析対象ドメイン: ${domain}
+
+以下のJSONのみを返してください:
 {
-  "response": "（AI検索エンジンとしての回答テキスト）",
-  "mentioned_domains": ["example.com", "example2.com"],
-  "is_domain_mentioned": true/false（${domain}が言及されたか）,
+  "is_domain_mentioned": true/false,
   "mention_type": "DIRECT" | "INDIRECT" | "NOT_MENTIONED",
   "sentiment": "POSITIVE" | "NEUTRAL" | "NEGATIVE",
-  "share_of_voice": 0-100（回答全体における${domain}の存在感の割合）
-}
+  "share_of_voice": 0-100,
+  "mentioned_domains": ["example.com"]
+}`;
 
-JSONのみを返してください。`;
-
-  const responseText = await callClaude(prompt);
+  const analysisText = await callClaude(analysisPrompt);
 
   try {
-    // Extract JSON from response
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON found");
 
     const parsed = JSON.parse(jsonMatch[0]);
@@ -155,11 +225,11 @@ JSONのみを返してください。`;
       mentionType: parsed.mention_type ?? "NOT_MENTIONED",
       sentiment: parsed.sentiment ?? "NONE",
       shareOfVoice: parsed.share_of_voice ?? 0,
-      responseText: parsed.response ?? responseText,
+      responseText,
       competitors: (parsed.mentioned_domains ?? []).filter((d: string) => !d.includes(domain)),
     };
   } catch {
-    // If JSON parsing fails, do basic text analysis
+    // JSON パース失敗時はテキスト分析にフォールバック
     const mentioned = responseText.toLowerCase().includes(domain.toLowerCase());
     return {
       engine,

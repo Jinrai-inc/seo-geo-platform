@@ -13,7 +13,7 @@ function isConfigured(): boolean {
 
 async function apiRequest(endpoint: string, body: unknown) {
   if (!isConfigured()) {
-    return null; // Fallback to dummy data
+    return null;
   }
 
   const res = await fetch(`${DATAFORSEO_BASE}${endpoint}`, {
@@ -35,13 +35,7 @@ export async function getSearchVolume(keywords: string[]) {
   ]);
 
   if (!result) {
-    // Dummy data fallback
-    return keywords.map((kw) => ({
-      keyword: kw,
-      searchVolume: Math.floor(Math.random() * 10000) + 100,
-      competition: Math.random(),
-      cpc: +(Math.random() * 500).toFixed(2),
-    }));
+    return null;
   }
 
   return result.tasks?.[0]?.result ?? [];
@@ -53,16 +47,7 @@ export async function getSerpResults(keyword: string, location: string = "Japan"
   ]);
 
   if (!result) {
-    // Dummy data fallback
-    return {
-      items: Array.from({ length: 10 }, (_, i) => ({
-        rank_absolute: i + 1,
-        url: `https://example${i}.com`,
-        title: `Result ${i + 1} for ${keyword}`,
-        description: `Description for result ${i + 1}`,
-      })),
-      hasAiOverview: Math.random() > 0.5,
-    };
+    return null;
   }
 
   return result.tasks?.[0]?.result?.[0] ?? null;
@@ -74,7 +59,7 @@ export async function getDomainRating(domain: string) {
   ]);
 
   if (!result) {
-    return { domainRating: Math.floor(Math.random() * 80) + 10, backlinkCount: Math.floor(Math.random() * 5000), referringDomains: Math.floor(Math.random() * 500) };
+    return null;
   }
 
   const data = result.tasks?.[0]?.result?.[0];
@@ -91,7 +76,7 @@ export async function getKeywordDifficulty(keyword: string) {
   ]);
 
   if (!result) {
-    return { difficulty: Math.floor(Math.random() * 100) };
+    return null;
   }
 
   return { difficulty: result.tasks?.[0]?.result?.[0]?.keyword_difficulty ?? 0 };

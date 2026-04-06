@@ -134,7 +134,9 @@ function ProjectSettings() {
                 <p className="text-xs text-text-dim">トラフィックデータを取得</p>
               </div>
             </div>
-            <Badge color="dim">近日対応</Badge>
+            <Button size="sm" variant="outline" onClick={() => window.location.href = "/api/auth/gsc?scope=analytics"}>
+              連携する
+            </Button>
           </div>
           <div className="flex items-center justify-between py-2 border-t border-border">
             <div className="flex items-center gap-3">
@@ -268,6 +270,87 @@ function NotificationSettings() {
 }
 
 function BillingSettings() {
+  const { orgId } = useProject();
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showCardForm, setShowCardForm] = useState(false);
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpMonth, setCardExpMonth] = useState("");
+  const [cardExpYear, setCardExpYear] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const planKeyMap: Record<string, string> = {
+    "スターター": "STARTER",
+    "ビジネス": "BUSINESS",
+    "エージェンシー": "AGENCY",
+  };
+
+  const handleSubscribe = async () => {
+    if (!orgId || !selectedPlan) return;
+    setError(null);
+    setIsProcessing(true);
+
+    try {
+      // Pay.jp のクライアント側トークン化
+      const payjpPublicKey = process.env.NEXT_PUBLIC_PAYJP_PUBLIC_KEY;
+      if (!payjpPublicKey) {
+        setError("Pay.jp の設定が完了していません。管理者にお問い合わせください。");
+        setIsProcessing(false);
+        return;
+      }
+
+      const tokenRes = await fetch("https://api.pay.jp/v1/tokens", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${btoa(payjpPublicKey + ":")}`,
+        },
+        body: new URLSearchParams({
+          "card[number]": cardNumber.replace(/\s/g, ""),
+          "card[exp_month]": cardExpMonth,
+          "card[exp_year]": cardExpYear,
+          "card[cvc]": cardCvc,
+        }),
+      });
+
+      const tokenData = await tokenRes.json();
+      if (tokenData.error) {
+        setError(tokenData.error.message || "カード情報が正しくありません");
+        setIsProcessing(false);
+        return;
+      }
+
+      // サーバー側でサブスクリプションを作成
+      const res = await fetch("/api/payjp/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orgId,
+          plan: selectedPlan,
+          token: tokenData.id,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "サブスクリプションの作成に失敗しました");
+      } else {
+        setShowCardForm(false);
+        setSelectedPlan(null);
+        setCardNumber("");
+        setCardExpMonth("");
+        setCardExpYear("");
+        setCardCvc("");
+        window.location.reload();
+      }
+    } catch {
+      setError("通信エラーが発生しました。再度お試しください。");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -328,9 +411,9 @@ function BillingSettings() {
                 disabled={plan.current}
                 onClick={() => {
                   if (!plan.current) {
-                    // Pay.jp チェックアウトはフロント側トークン化が必要
-                    // 実装時は PayjpCheckout コンポーネントで token を取得後 API を呼ぶ
-                    alert("プランの変更は管理者にお問い合わせください");
+                    setSelectedPlan(planKeyMap[plan.name]);
+                    setShowCardForm(true);
+                    setError(null);
                   }
                 }}
               >
@@ -340,6 +423,75 @@ function BillingSettings() {
           ))}
         </div>
       </Card>
+
+      {/* カード入力フォーム */}
+      {showCardForm && (
+        <Card>
+          <h3 className="text-sm font-medium text-text-mid mb-4">お支払い情報の入力</h3>
+          {error && (
+            <div className="bg-warn/10 border border-warn/30 rounded-lg px-3 py-2 text-sm text-warn mb-4">
+              {error}
+            </div>
+          )}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-text-mid mb-1.5">カード番号</label>
+              <input
+                type="text"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+                placeholder="4242 4242 4242 4242"
+                maxLength={19}
+                className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text placeholder:text-text-dim focus:outline-none focus:border-accent/50"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-text-mid mb-1.5">有効期限（月）</label>
+                <input
+                  type="text"
+                  value={cardExpMonth}
+                  onChange={(e) => setCardExpMonth(e.target.value)}
+                  placeholder="12"
+                  maxLength={2}
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text placeholder:text-text-dim focus:outline-none focus:border-accent/50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-text-mid mb-1.5">有効期限（年）</label>
+                <input
+                  type="text"
+                  value={cardExpYear}
+                  onChange={(e) => setCardExpYear(e.target.value)}
+                  placeholder="2028"
+                  maxLength={4}
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text placeholder:text-text-dim focus:outline-none focus:border-accent/50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-text-mid mb-1.5">CVC</label>
+                <input
+                  type="text"
+                  value={cardCvc}
+                  onChange={(e) => setCardCvc(e.target.value)}
+                  placeholder="123"
+                  maxLength={4}
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text placeholder:text-text-dim focus:outline-none focus:border-accent/50"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button loading={isProcessing} onClick={handleSubscribe}>
+                <CreditCard size={16} className="mr-1.5" />
+                サブスクリプションを開始
+              </Button>
+              <Button variant="ghost" onClick={() => { setShowCardForm(false); setError(null); }}>
+                キャンセル
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <Card>
         <h3 className="text-sm font-medium text-text-mid mb-4">請求情報</h3>

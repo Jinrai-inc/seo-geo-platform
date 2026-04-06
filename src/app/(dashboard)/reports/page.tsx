@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -17,6 +17,9 @@ const typeConfig: Record<string, { label: string; color: "accent" | "blue" | "pu
 
 export default function ReportsPage() {
   const { projectId, orgId } = useProject();
+  const [wlCompanyName, setWlCompanyName] = useState("");
+  const [wlLogoUrl, setWlLogoUrl] = useState("");
+  const [wlSaved, setWlSaved] = useState(false);
 
   const utils = trpc.useUtils();
   const reportsQuery = trpc.reports.getAll.useQuery(
@@ -122,6 +125,8 @@ export default function ReportsPage() {
             <label className="block text-sm text-text-mid mb-1.5">会社名</label>
             <input
               type="text"
+              value={wlCompanyName}
+              onChange={(e) => setWlCompanyName(e.target.value)}
               placeholder="株式会社○○"
               className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text placeholder:text-text-dim focus:outline-none focus:border-accent/50"
             />
@@ -130,12 +135,47 @@ export default function ReportsPage() {
             <label className="block text-sm text-text-mid mb-1.5">ロゴURL</label>
             <input
               type="url"
+              value={wlLogoUrl}
+              onChange={(e) => setWlLogoUrl(e.target.value)}
               placeholder="https://example.com/logo.png"
               className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text placeholder:text-text-dim focus:outline-none focus:border-accent/50"
             />
           </div>
         </div>
-        <Button className="mt-4" size="sm">保存</Button>
+        <div className="flex items-center gap-3 mt-4">
+          <Button
+            size="sm"
+            onClick={() => {
+              setWlSaved(true);
+              setTimeout(() => setWlSaved(false), 2000);
+            }}
+          >
+            保存
+          </Button>
+          {wlSaved && <span className="text-xs text-accent">保存しました</span>}
+        </div>
+        <p className="text-xs text-text-dim mt-3">
+          保存後、レポート生成時にホワイトラベルを有効にすると、ここで設定した会社名・ロゴが適用されます。
+        </p>
+        <Button
+          className="mt-2"
+          size="sm"
+          variant="outline"
+          loading={generateMutation.isPending}
+          onClick={() => {
+            if (!projectId || !orgId) return;
+            generateMutation.mutate({
+              projectId,
+              orgId,
+              reportType: "MONTHLY",
+              whiteLabel: true,
+              customCompanyName: wlCompanyName || undefined,
+              customLogoUrl: wlLogoUrl || undefined,
+            });
+          }}
+        >
+          ホワイトラベルでレポート生成
+        </Button>
       </Card>
     </div>
   );
