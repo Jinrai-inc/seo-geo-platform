@@ -9,7 +9,7 @@ function getResend(): Resend {
   return resendClient;
 }
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "noreply@seogeo.jp";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "noreply@sg-platform.jp";
 
 export async function sendEmailNotification(
   to: string,
@@ -41,7 +41,7 @@ export function formatRankChangeEmail(
   const emoji = diff > 0 ? "📈" : "📉";
 
   return {
-    subject: `[SEO×GEO] ${emoji} ${keyword} の順位が${Math.abs(diff)}位${direction}しました`,
+    subject: `[S&G] ${emoji} ${keyword} の順位が${Math.abs(diff)}位${direction}しました`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #1a2738;">順位変動アラート</h2>
@@ -64,7 +64,7 @@ export function formatGeoChangeEmail(
 ): { subject: string; html: string } {
   const status = isMentioned ? "言及あり" : "言及なし";
   return {
-    subject: `[SEO×GEO] GEO変動通知 - ${keyword} (${engine})`,
+    subject: `[S&G] GEO変動通知 - ${keyword} (${engine})`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #1a2738;">GEO変動通知</h2>
@@ -84,7 +84,7 @@ export function formatErrorEmail(
   domain: string
 ): { subject: string; html: string } {
   return {
-    subject: `[SEO×GEO] ⚠️ エラー通知 - ${domain}`,
+    subject: `[S&G] ⚠️ エラー通知 - ${domain}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #FF5C5C;">エラー通知</h2>

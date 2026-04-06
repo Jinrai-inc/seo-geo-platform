@@ -228,14 +228,14 @@ function renderReportHtml(data: ReportData): string {
     TECHNICAL_SEO: "テクニカルSEOレポート",
   };
 
-  const brandName = data.whiteLabel && data.customCompanyName ? data.customCompanyName : "SEO×GEO Platform";
+  const brandName = data.whiteLabel && data.customCompanyName ? data.customCompanyName : "S&G Platform";
   const logoHtml = data.whiteLabel && data.customLogoUrl
     ? `<img src="${data.customLogoUrl}" alt="${brandName}" style="max-height: 40px; margin-bottom: 16px;" />`
     : "";
 
   const sectionsHtml = data.sections.map((s) => `
     <div style="margin-bottom: 32px;">
-      <h2 style="font-size: 18px; color: #1a2738; border-bottom: 2px solid #00E4B8; padding-bottom: 8px; margin-bottom: 16px;">${s.title}</h2>
+      <h2 style="font-size: 18px; color: #1a2738; border-bottom: 2px solid #6366F1; padding-bottom: 8px; margin-bottom: 16px;">${s.title}</h2>
       ${s.content}
     </div>
   `).join("");
@@ -252,8 +252,8 @@ function renderReportHtml(data: ReportData): string {
     th { background: #f7fafc; font-weight: 600; color: #5c6f82; }
     h1 { font-size: 24px; margin-bottom: 4px; }
     p { font-size: 14px; line-height: 1.6; }
-    strong { color: #00E4B8; }
-    .header { border-bottom: 3px solid #00E4B8; padding-bottom: 16px; margin-bottom: 32px; }
+    strong { color: #6366F1; }
+    .header { border-bottom: 3px solid #6366F1; padding-bottom: 16px; margin-bottom: 32px; }
     .meta { font-size: 12px; color: #5c6f82; }
     .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #9baabb; text-align: center; }
   </style>

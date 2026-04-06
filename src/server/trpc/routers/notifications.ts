@@ -48,7 +48,7 @@ export const notificationsRouter = t.router({
       const setting = await prisma.notificationSetting.findUnique({ where: { id: input.id } });
       if (!setting) throw new Error("Notification setting not found");
 
-      const testMessage = "SEO×GEO プラットフォームからのテスト通知です。正常に受信できています。";
+      const testMessage = "S&G Platformからのテスト通知です。正常に受信できています。";
 
       switch (setting.channel) {
         case "SLACK":
@@ -63,7 +63,7 @@ export const notificationsRouter = t.router({
           if (!setting.webhookUrl) throw new Error("メールアドレスが未設定です");
           await sendEmailNotification(
             setting.webhookUrl,
-            "[SEO×GEO] テスト通知",
+            "[S&G] テスト通知",
             `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #1a2738;">テスト通知</h2>
               <p>${testMessage}</p>

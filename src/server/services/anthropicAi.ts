@@ -14,7 +14,7 @@ export async function callClaude(prompt: string, systemPrompt?: string): Promise
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4096,
-      system: systemPrompt || "あなたはSEO・GEOの専門家アシスタントです。",
+      system: systemPrompt || "あなたはS&G Platformの専門家アシスタントです。SEO・GEOの知識を活用して回答してください。",
       messages: [{ role: "user", content: prompt }],
     }),
   });

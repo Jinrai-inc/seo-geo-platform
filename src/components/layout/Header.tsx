@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Menu, FileText, User } from "lucide-react";
+import { Menu, Bell, User } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
 
 export function Header() {
@@ -10,21 +10,22 @@ export function Header() {
 
   return (
     <>
-      <header className="md:hidden flex items-center justify-between p-4 bg-bg-soft border-b border-border sticky top-0 z-40">
-        <button onClick={() => setMenuOpen(true)} className="text-text-mid">
-          <Menu size={24} />
+      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0A0D14]/90 backdrop-blur-md border-b border-white/[0.06] sticky top-0 z-40">
+        <button onClick={() => setMenuOpen(true)} className="text-text-dim hover:text-text p-1">
+          <Menu size={22} />
         </button>
-        <Link href="/" className="text-lg font-bold">
-          <span className="bg-gradient-to-r from-accent to-blue bg-clip-text text-transparent">
-            SEO×GEO
-          </span>
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent to-purple flex items-center justify-center text-white text-xs font-bold">
+            S
+          </div>
+          <span className="text-base font-bold tracking-tight text-text">S&G</span>
         </Link>
-        <div className="flex items-center gap-3">
-          <button className="text-text-mid hover:text-text">
-            <FileText size={20} />
+        <div className="flex items-center gap-2">
+          <button className="text-text-dim hover:text-text p-1">
+            <Bell size={18} />
           </button>
-          <button className="w-8 h-8 rounded-full bg-card-alt flex items-center justify-center">
-            <User size={16} className="text-text-mid" />
+          <button className="w-7 h-7 rounded-full bg-accent/12 flex items-center justify-center">
+            <User size={14} className="text-indigo-300" />
           </button>
         </div>
       </header>

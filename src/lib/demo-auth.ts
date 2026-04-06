@@ -15,11 +15,11 @@ export interface DemoUser {
 
 // テスト用アカウント
 export const DEMO_ACCOUNTS: Record<string, { password: string; user: DemoUser }> = {
-  "enterprise@test.seogeo.jp": {
+  "enterprise@test.sg-platform.jp": {
     password: "Enterprise2024!",
     user: {
       id: "demo-enterprise-001",
-      email: "enterprise@test.seogeo.jp",
+      email: "enterprise@test.sg-platform.jp",
       companyName: "株式会社テストエンタープライズ",
       lastName: "田中",
       firstName: "太郎",

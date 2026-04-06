@@ -28,17 +28,20 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
   return (
     <div className="fixed inset-0 z-50 md:hidden">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="absolute left-0 top-0 h-full w-72 bg-bg-soft border-r border-border p-4 animate-in slide-in-from-left">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute left-0 top-0 h-full w-72 bg-[#0A0D14] border-r border-white/[0.06] p-4 animate-in slide-in-from-left">
         <div className="flex items-center justify-between mb-6">
-          <span className="text-xl font-bold bg-gradient-to-r from-accent to-blue bg-clip-text text-transparent">
-            SEO×GEO
-          </span>
-          <button onClick={onClose} className="text-text-mid">
-            <X size={24} />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-purple flex items-center justify-center text-white text-sm font-bold">
+              S
+            </div>
+            <span className="text-lg font-bold tracking-tight text-text">S&G</span>
+          </div>
+          <button onClick={onClose} className="text-text-dim hover:text-text p-1">
+            <X size={22} />
           </button>
         </div>
-        <nav className="space-y-1">
+        <nav className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
             return (
@@ -46,8 +49,8 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition-colors ${
-                  isActive ? "bg-accent-soft text-accent" : "text-text-mid hover:text-text hover:bg-card"
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
+                  isActive ? "bg-accent/12 text-indigo-300" : "text-text-dim hover:text-text hover:bg-white/[0.04]"
                 }`}
               >
                 <item.icon size={18} />

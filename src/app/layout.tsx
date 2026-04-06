@@ -4,8 +4,8 @@ import { ProjectProvider } from "@/components/providers/ProjectProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SEO×GEO Platform",
-  description: "SEO×GEO 統合プラットフォーム",
+  title: "S&G Platform",
+  description: "S&G 統合プラットフォーム - SEO & GEO",
 };
 
 export default function RootLayout({

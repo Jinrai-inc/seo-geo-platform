@@ -9,14 +9,14 @@ import {
 describe("demo-auth", () => {
   describe("validateCredentials", () => {
     it("正しい認証情報で DemoUser を返す", () => {
-      const user = validateCredentials("enterprise@test.seogeo.jp", "Enterprise2024!");
+      const user = validateCredentials("enterprise@test.sg-platform.jp", "Enterprise2024!");
       expect(user).not.toBeNull();
-      expect(user!.email).toBe("enterprise@test.seogeo.jp");
+      expect(user!.email).toBe("enterprise@test.sg-platform.jp");
       expect(user!.plan).toBe("ENTERPRISE");
     });
 
     it("間違ったパスワードで null を返す", () => {
-      const user = validateCredentials("enterprise@test.seogeo.jp", "wrong");
+      const user = validateCredentials("enterprise@test.sg-platform.jp", "wrong");
       expect(user).toBeNull();
     });
 
@@ -28,7 +28,7 @@ describe("demo-auth", () => {
 
   describe("createSessionToken / parseSessionToken", () => {
     it("トークンを作成して正しくパースできる", () => {
-      const demoUser = DEMO_ACCOUNTS["enterprise@test.seogeo.jp"].user;
+      const demoUser = DEMO_ACCOUNTS["enterprise@test.sg-platform.jp"].user;
       const token = createSessionToken(demoUser);
       expect(typeof token).toBe("string");
       expect(token.length).toBeGreaterThan(0);
