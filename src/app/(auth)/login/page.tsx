@@ -100,6 +100,13 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
+        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-text-dim">
+          <Link href="/terms" className="hover:text-text-mid transition-colors">利用規約</Link>
+          <span>|</span>
+          <Link href="/privacy" className="hover:text-text-mid transition-colors">プライバシーポリシー</Link>
+          <span>|</span>
+          <Link href="/commerce" className="hover:text-text-mid transition-colors">特商法表記</Link>
+        </div>
       </div>
     </div>
   );

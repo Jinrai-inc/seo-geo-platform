@@ -99,6 +99,11 @@ export default function SignupPage() {
             <Link href="/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">ログイン</Link>
           </p>
         </div>
+        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-text-dim">
+          <Link href="/terms" className="hover:text-text-mid transition-colors">利用規約</Link>
+          <span>|</span>
+          <Link href="/privacy" className="hover:text-text-mid transition-colors">プライバシーポリシー</Link>
+        </div>
       </div>
     </div>
   );
